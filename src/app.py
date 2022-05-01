@@ -13,16 +13,15 @@ class FirstPage(tk.Frame):
     tk.Frame.__init__(self, parent)
     # self.configure(bg='blue')
     emailLabel = tk.Label(self, text="Enter your email E-mail")
-    emailLabel.place(x=100, y= 100, width= 150, height= 30)
-    
+    emailLabel.place(x=100, y=100, width=150, height=30)
+
     emailEntry = tk.Entry(self, text='')
     emailEntry.place(x=280, y=100, width=150, height=30)
-
 
     passwordLabel = tk.Label(self, text="Enter your email password")
     passwordLabel.place(x=100, y=160, width=150, height=30)
 
-    passwordEntry = tk.Entry(self, text='')
+    passwordEntry = tk.Entry(self, text='', show='*')
     passwordEntry.place(x=280, y=160, width=150, height=30)
 
     macLabel = tk.Label(self, text="Enter your PC name")
@@ -42,15 +41,16 @@ class FirstPage(tk.Frame):
       authData = res.json()
       UserID().setUID(authData['data']['mac_id'])
       print('setup successful')
-      getUserBot()
       controller.show_frame(SecondPage)
-    else: 
+      controller.updateList()
+    else:
       pass
+
 
 class SecondPage(tk.Frame):
   def __init__(self, parent, controller):
     tk.Frame.__init__(self, parent)
-    columns = ('num','name', 'description', 'date_modified')
+    columns = ('num', 'name', 'description', 'date_modified')
     self.tree = ttk.Treeview(self, columns=columns, show='headings')
     self.tree.heading('num', text='No.')
     self.tree.heading('name', text='Name')
@@ -62,16 +62,17 @@ class SecondPage(tk.Frame):
     self.tree.column('description', width=250)
     self.tree.column('date_modified', width=130)
     self.bots = []
-    self.updateBotList()
+    # self.updateBotList()
     self.tree.grid(row=0, column=0, sticky='nsew')
     self.tree.bind("<<TreeviewSelect>>", self.item_selected)
 
     # add a scrollbar
-    scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL, command=self.tree.yview)
+    scrollbar = ttk.Scrollbar(
+        self, orient=tk.VERTICAL, command=self.tree.yview)
     self.tree.configure(yscroll=scrollbar.set)
     scrollbar.grid(row=0, column=1, sticky='ns')
     self.refreshButton = tk.Button(self, text="Refresh List", font=(
-        "Arial", 15), command=lambda: refreshList(''))
+        "Arial", 15), command=lambda: self.refreshBotList())
     self.refreshButton.place(x=160, y=280)
     self.execButton = tk.Button(self, text="Run Bot", font=(
         "Arial", 15), command=lambda: execScript(self.script))
@@ -79,8 +80,9 @@ class SecondPage(tk.Frame):
     self.execButton.place(x=320, y=280)
     self.script = ''
 
-  def refreshList(self):
+  def refeshBotList(self):
     pass
+
   def updateBotList(self):
     self.bots = getUserBot()
     for bot in [(a + 1, b['bot_name'], b['bot_desc'], b['updated_at']) for a, b in enumerate(self.bots)]:
@@ -91,14 +93,16 @@ class SecondPage(tk.Frame):
       item = self.tree.item(selected_item)
       record = item['values']
       self.execButton['state'] = NORMAL
-      self.script= self.bots[record[0] - 1]['script']
+      self.script = self.bots[record[0] - 1]['script']
       # show a message
       print(record)
+
 
 class PopUp(tk.Toplevel):
   def __init__(self, parent):
     #To do: Add pop up window for warning and error mesages
     pass
+
 
 class Application(tk.Tk):
   def __init__(self, auth, *args, **kwargs):
@@ -114,7 +118,7 @@ class Application(tk.Tk):
 
     window.grid_rowconfigure(0, minsize=350)
     window.grid_columnconfigure(0, minsize=700)
-    self.minsize(600,350)
+    self.minsize(600, 350)
     self.maxsize(600, 350)
     self.frames = {}
     for F in self.pageTuple:
@@ -132,5 +136,7 @@ class Application(tk.Tk):
     frame.tkraise()
 
   def refresh_page(self, page):
-    self.show_frame(self.pageTurple[page])
+    self.show_frame(self.pageTuple[page])
 
+  def updateList(self):
+    self.frames[SecondPage].updateBotList()
