@@ -72,7 +72,7 @@ class SecondPage(tk.Frame):
     self.tree.configure(yscroll=scrollbar.set)
     scrollbar.grid(row=0, column=1, sticky='ns')
     self.refreshButton = tk.Button(self, text="Refresh List", font=(
-        "Arial", 15), command=lambda: self.refreshBotList())
+        "Arial", 15), command=lambda: self.updateBotList())
     self.refreshButton.place(x=160, y=280)
     self.execButton = tk.Button(self, text="Run Bot", font=(
         "Arial", 15), command=lambda: execScript(self.script))
@@ -80,11 +80,10 @@ class SecondPage(tk.Frame):
     self.execButton.place(x=320, y=280)
     self.script = ''
 
-  def refeshBotList(self):
-    pass
-
   def updateBotList(self):
     self.bots = getUserBot()
+    for i in self.tree.get_children():
+      self.tree.delete(i)
     for bot in [(a + 1, b['bot_name'], b['bot_desc'], b['updated_at']) for a, b in enumerate(self.bots)]:
       self.tree.insert('', tk.END, values=bot)
 
@@ -127,6 +126,7 @@ class Application(tk.Tk):
       frame.grid(row=0, column=0, sticky="nsew")
 
     if(auth):
+      self.updateList()
       self.show_frame(SecondPage)
     else:
       self.show_frame(FirstPage)

@@ -10,17 +10,14 @@ from src.service import auth, UserID, getUserBot
 isAuth = False
 res = auth()
 
-
-app = Application(auth=isAuth)
-
 if res.status_code == 200:
-
   authData = res.json()
   UserID().setUID(authData['data']['mac_id'])
   print(authData['data']['mac_id'])
   isAuth = True
-  app.updateList()
 
+  
+app = Application(auth=isAuth)
 print(res.json())
 
 # Define a function for quit the window
