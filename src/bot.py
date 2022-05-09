@@ -113,7 +113,6 @@ class CSV:
     pass
 
   def saveDictToCSV(self, dict, path, filename):
-    print(dict)
     df = pd.DataFrame(dict)
     df.to_csv(os.path.join(path, filename), encoding='utf-8', index=False)
 
@@ -121,5 +120,8 @@ class CSV:
     df = pd.read_csv(os.path.join(path, filename))
     return df.to_dict(orient='list')
 
-  def mergeCSV(self, options):
-    pass
+  def mergeCSV(self, allFilePath, outputFilePath, options):
+    #combine all files in the list
+    combined_csv = pd.concat([pd.read_csv(f, sep=options['seperator'], engine='python') for f in allFilePath])
+    #export to csv
+    combined_csv.to_csv(outputFilePath, index=options['index'], encoding=options['encoding'])
