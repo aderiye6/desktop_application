@@ -125,3 +125,30 @@ class CSV:
     combined_csv = pd.concat([pd.read_csv(f, sep=options['seperator'], engine='python') for f in allFilePath])
     #export to csv
     combined_csv.to_csv(outputFilePath, index=options['index'], encoding=options['encoding'])
+
+  def splitCSV(self, filePath, outputDir, outputName, splitOptions, options):
+    data = pd.read_csv(filePath, sep=options['seperator'], engine='python')
+    if splitOptions['by'] == 'row':
+      size = len(data) 
+      length = splitOptions['length']
+      count = 0
+      
+      start = count*length
+      end = length*(count + 1)
+      while start< size:
+
+        if end > size:
+          end = size
+        df = data[start: end]
+        df.to_csv(os.path.join(outputDir, f'{outputName}_{count+1}.csv'))
+        count +=1
+        start = count*length
+        end = length*(count + 1)
+
+'''options = {
+  'seperator': ',',
+  'index': False,
+  'encoding': 'utf-8'
+}'''
+
+
