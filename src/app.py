@@ -5,8 +5,8 @@ from tkinter import DISABLED, ttk
 from tkinter.font import NORMAL
 from turtle import width
 from .service import register, UserID, botData, setBotData, getUserBot
-from .bot import execScript
-
+# from .bot import execScript
+from .script import RunBot
 
 class FirstPage(tk.Frame):
   def __init__(self, parent, controller):
@@ -75,11 +75,21 @@ class SecondPage(tk.Frame):
         "Arial", 15), command=lambda: self.updateBotList())
     self.refreshButton.place(x=160, y=280)
     self.execButton = tk.Button(self, text="Run Bot", font=(
-        "Arial", 15), command=lambda: execScript(self.script))
+        "Arial", 15), command=self.hadleRun)
     self.execButton['state'] = DISABLED
     self.execButton.place(x=320, y=280)
     self.script = ''
+  def hadleRun(self):
+    botThread = RunBot(1, self.script, True)
+    botThread.start()
+    self.monitor(botThread)
 
+  def monitor(self, thread):
+      if thread.is_alive():
+        # check the thread every 100ms
+        self.after(100, lambda: self.monitor(thread))
+      else:
+        print("bot run")
   def updateBotList(self):
     self.bots = getUserBot()
     for i in self.tree.get_children():

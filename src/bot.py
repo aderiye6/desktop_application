@@ -4,6 +4,10 @@ from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import urllib.request as url
 from time import sleep
 import pandas as pd
 import os
@@ -104,13 +108,50 @@ class Window:
   def elementInput(self, method, element, keysList):
     self.driver.find_element(method, element).send_keys(*keysList)
 
+  def refreshPage(self, tabID):
+    self.switchTab(tabID)
+    self.driver.refresh()
+
+  def saveImage(self, method, element, path, filename):
+    img = self.driver.find_element(method, element)
+    src = img.get_attribute('src')
+    url.urlretrieve(src, os.path.join(path, filename))
+
+  def screenShot(self, tabID, path, filename):
+    self.switchTab(tabID)
+    el = self.driver.find_element_by_tag_name('body')
+    el.screenshot(os.path.join(path, filename))
+  
+  def waitElement(self, method, element, timeout):
+    try:
+      element_present = EC.presence_of_element_located((method, element))
+      WebDriverWait(self.driver, timeout).until(element_present)
+    except TimeoutException:
+      print("Timed out waiting for element")
+
+  def handleAlert(self, action, text=None):
+    obj = self.driver.switch_to.alert
+    msg = obj.text
+    if action == 'accept':
+      obj.accept()
+    elif action == 'cancel':
+      obj.dismiss()
+    elif action == 'input':
+      obj.send_keys(text)
+
+    return msg
+
   def closeBrowser(self):
     self.driver.quit()
-
+    
 
 class CSV:
   def __init__(self):
-    pass
+    self.options = {
+        'seperator': ',',
+        'index': False,
+        'encoding': 'utf-8'
+    }
 
   def saveDictToCSV(self, dict, path, filename):
     df = pd.DataFrame(dict)
@@ -120,13 +161,18 @@ class CSV:
     df = pd.read_csv(os.path.join(path, filename))
     return df.to_dict(orient='list')
 
-  def mergeCSV(self, allFilePath, outputFilePath, options):
+  def mergeCSV(self, allFilePath, outputFilePath, options= None):
+    if not options:
+      options = self.options
     #combine all files in the list
     combined_csv = pd.concat([pd.read_csv(f, sep=options['seperator'], engine='python') for f in allFilePath])
     #export to csv
     combined_csv.to_csv(outputFilePath, index=options['index'], encoding=options['encoding'])
 
-  def splitCSV(self, filePath, outputDir, outputName, splitOptions, options):
+  def splitCSV(self, filePath, outputDir, outputName, splitOptions, options=None):
+    if not options:
+      options = self.options
+    # To do: remove duplicate values
     data = pd.read_csv(filePath, sep=options['seperator'], engine='python')
     if splitOptions['by'] == 'row':
       size = len(data) 
@@ -144,11 +190,9 @@ class CSV:
         count +=1
         start = count*length
         end = length*(count + 1)
+    elif splitOptions['by'] == 'column':
+      # To do: split CSV by column, split csv by value on a column
+      pass
 
-'''options = {
-  'seperator': ',',
-  'index': False,
-  'encoding': 'utf-8'
-}'''
 
 
