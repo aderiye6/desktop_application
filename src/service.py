@@ -20,26 +20,29 @@ def auth():
 
   return res
 
-def register(email, password, macName):
+def login(email, password, workspace_url):
   mac = gma()
-  regURL = '/user/machine/register'
+  regURL = '/auth/login/machine'
   url = baseURL + regURL
   data = {
-    'mac': str(mac),
+    # 'mac': str(mac),
     'email': email,
     'password': password,
-    'mac_name': macName
+    'workspace_url': workspace_url,
+    'mac_id': gma()
   }
   res = requests.post(url, json=data)
   return res 
 
 def getUserBot():
-  authURL = '/bots/'
-  url = baseURL + authURL
-  data = {
-    'mac_id': UserID().getUID()
-  }
-  res = requests.get(url, params=data)
+  mac = gma()
+  botURL = f'/bots/{mac}'
+  url = baseURL + botURL
+  # data = {
+  #     'mac_id': gma()
+  # }
+  headers = {"Authorization": f"Bearer {UserID().getUID()}"}
+  res = requests.get(url, headers=headers)
   print(res.json())
   if res.status_code == 200:
     return res.json()['data']

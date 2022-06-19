@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import DISABLED, ttk
 from tkinter.font import NORMAL
 from turtle import width
-from .service import register, UserID, botData, setBotData, getUserBot
+from .service import login, UserID, botData, setBotData, getUserBot
 # from .bot import execScript
 from .script import RunBot
 
@@ -24,22 +24,35 @@ class FirstPage(tk.Frame):
     passwordEntry = tk.Entry(self, text='', show='*')
     passwordEntry.place(x=280, y=160, width=150, height=30)
 
-    macLabel = tk.Label(self, text="Enter your PC name")
-    macLabel.place(x=100, y=220, width=150, height=30)
+    workLabel = tk.Label(self, text="Workspace url")
+    workLabel.place(x=100, y=220, width=150, height=30)
 
-    macEntry = tk.Entry(self, text='')
-    macEntry.place(x=280, y=220, width=150, height=30)
-    Button = tk.Button(self, text="Register PC", font=(
-        "Arial", 15), command=lambda: self.reg(emailEntry.get(), passwordEntry.get(), macEntry.get(), controller))
+    workEntry = tk.Entry(self, text='')
+    workEntry.place(x=280, y=220, width=150, height=30)
+    Button = tk.Button(self, text="Login", font=(
+        "Arial", 15), command=lambda: self.login(emailEntry.get(), passwordEntry.get(), workEntry.get(), controller))
     Button.place(x=220, y=280)
 
-  def reg(self, email, password, macName, controller):
+  # def reg(self, email, password, macName, controller):
+  #   # To do: include validators before calling register function.
+  #   res = register(email, password, macName)
+  #   print(res.status_code)
+  #   if res.status_code == 201:
+  #     authData = res.json()
+  #     UserID().setUID(authData['data']['mac_id'])
+  #     print('setup successful')
+  #     controller.show_frame(SecondPage)
+  #     controller.updateList()
+  #   else:
+  #     pass
+
+  def login(self, email, password, workurl, controller):
     # To do: include validators before calling register function.
-    res = register(email, password, macName)
+    res = login(email, password, workurl)
     print(res.status_code)
-    if res.status_code == 201:
+    if res.status_code == 200:
       authData = res.json()
-      UserID().setUID(authData['data']['mac_id'])
+      UserID().setUID(authData['data']['access_token'])
       print('setup successful')
       controller.show_frame(SecondPage)
       controller.updateList()
@@ -50,16 +63,18 @@ class FirstPage(tk.Frame):
 class SecondPage(tk.Frame):
   def __init__(self, parent, controller):
     tk.Frame.__init__(self, parent)
-    columns = ('num', 'name', 'description', 'date_modified')
+    columns = ('num', 'name', 'description','status', 'date_modified')
     self.tree = ttk.Treeview(self, columns=columns, show='headings')
     self.tree.heading('num', text='No.')
     self.tree.heading('name', text='Name')
     self.tree.heading('description', text='Description')
+    self.tree.heading('status', text='Status')
     self.tree.heading('date_modified', text='Date Modified')
 
     self.tree.column('num', width=60)
-    self.tree.column('name', width=140)
-    self.tree.column('description', width=250)
+    self.tree.column('name', width=100)
+    self.tree.column('description', width=200)
+    self.tree.column('status', width=80)
     self.tree.column('date_modified', width=130)
     self.bots = []
     # self.updateBotList()
@@ -80,7 +95,7 @@ class SecondPage(tk.Frame):
     self.execButton.place(x=320, y=280)
     self.script = ''
   def hadleRun(self):
-    botThread = RunBot(1, self.script, True)
+    botThread = RunBot(1, self.script, False)
     botThread.start()
     self.monitor(botThread)
 
@@ -94,15 +109,18 @@ class SecondPage(tk.Frame):
     self.bots = getUserBot()
     for i in self.tree.get_children():
       self.tree.delete(i)
-    for bot in [(a + 1, b['bot_name'], b['bot_desc'], b['updated_at']) for a, b in enumerate(self.bots)]:
+    for bot in [(a + 1, b['name'], '', b['status'], b['updated_at']) for a, b in enumerate(self.bots)]:
       self.tree.insert('', tk.END, values=bot)
 
   def item_selected(self, event):
     for selected_item in self.tree.selection():
       item = self.tree.item(selected_item)
       record = item['values']
-      self.execButton['state'] = NORMAL
-      self.script = self.bots[record[0] - 1]['script']
+      if self.bots[record[0] - 1]['status'] == 'CONNECTED':
+        self.execButton['state'] = NORMAL
+        self.script = self.bots[record[0] - 1]['script']
+      else:
+        self.execButton['state'] = DISABLED
       # show a message
       print(record)
 

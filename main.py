@@ -8,17 +8,17 @@ from src.app import Application
 from src.service import auth, UserID, getUserBot
 
 isAuth = False
-res = auth()
+# res = auth()
 
-if res.status_code == 200:
-  authData = res.json()
-  UserID().setUID(authData['data']['mac_id'])
-  print(authData['data']['mac_id'])
-  isAuth = True
+# if res.status_code == 200:
+#   authData = res.json()
+#   UserID().setUID(authData['data']['mac_id'])
+#   print(authData['data']['mac_id'])
+#   isAuth = True
 
   
 app = Application(auth=isAuth)
-print(res.json())
+# print(res.json())
 
 # Define a function for quit the window
 
