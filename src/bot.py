@@ -38,7 +38,7 @@ def execScript(script):
 
 
 class Browser:
-  def openBrowser(url='https://google.com', options={'browser': 'Chrome', 'maximised': True}):
+  def openBrowser(url='https://google.com', options={'browser': 'Chrome', 'maximized': True}):
     driver = None
     if options['browser'] == 'Chrome':
       driver = webdriver.Chrome(
@@ -46,7 +46,7 @@ class Browser:
     else:
       driver = webdriver.Chrome(
           service=Service(ChromeDriverManager().install()))
-    if options['maximised']:
+    if options['maximized']:
       driver.maximize_window()
     driver.get(url)
     return (driver, 0)
@@ -79,7 +79,6 @@ class Browser:
   def getDataList(driver, method, element, skipFirst=False):
     dataList = []
     rawdata = []
-    print(element)
     rawdata = driver.find_elements(by=method, value=element)
 
     for d in range(len(rawdata)):

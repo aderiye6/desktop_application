@@ -5,8 +5,9 @@ from configparser import ConfigParser
 import os
 thisfolder = os.path.dirname(os.path.abspath(__file__))
 inifile = os.path.join(thisfolder, 'config.ini')
-baseURL = 'http://localhost:5000/api/v1'
-
+# baseURL = 'http://localhost:5000/api/v1'
+baseURL = 'https://kophy-rpa.herokuapp.com/api/v1'
+userid  = ''
 botData = []
 
 def auth():
@@ -43,7 +44,6 @@ def getUserBot():
   # }
   headers = {"Authorization": f"Bearer {UserID().getUID()}"}
   res = requests.get(url, headers=headers)
-  print(res.json())
   if res.status_code == 200:
     return res.json()['data']
   return []
@@ -51,17 +51,26 @@ def getUserBot():
 def setBotData(data):
   global botData
   botData = data
-class UserID:
-  def __init__(self) -> None:
-    self.parser =  ConfigParser()
-    self.parser.read(inifile)
+# class UserID:
+#   def __init__(self) -> None:
+#     self.parser =  ConfigParser()
+#     print(inifile)
+#     self.parser.read(inifile)
 
+#   def getUID(self):
+#     return self.parser.get('user', 'uid')
+
+#   def setUID(self, uid):
+#     self.parser.set('user', 'uid', uid)
+#     with open(inifile, 'w') as configFile:
+#       self.parser.write(configFile)
+
+class UserID:
+  def __init__(self):
+    self.uid = userid
   def getUID(self):
-    return self.parser.get('user', 'uid')
+    return self.uid
 
   def setUID(self, uid):
-    print(self.getUID())
-    print('called uid', uid)
-    self.parser.set('user', 'uid', uid)
-    with open(inifile, 'w') as configFile:
-      self.parser.write(configFile)
+    global userid
+    userid = uid

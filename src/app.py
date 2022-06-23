@@ -18,7 +18,7 @@ class FirstPage(tk.Frame):
     emailEntry = tk.Entry(self, text='')
     emailEntry.place(x=280, y=100, width=150, height=30)
 
-    passwordLabel = tk.Label(self, text="Enter your email password")
+    passwordLabel = tk.Label(self, text="Enter your password")
     passwordLabel.place(x=100, y=160, width=150, height=30)
 
     passwordEntry = tk.Entry(self, text='', show='*')
@@ -49,11 +49,9 @@ class FirstPage(tk.Frame):
   def login(self, email, password, workurl, controller):
     # To do: include validators before calling register function.
     res = login(email, password, workurl)
-    print(res.status_code)
     if res.status_code == 200:
       authData = res.json()
       UserID().setUID(authData['data']['access_token'])
-      print('setup successful')
       controller.show_frame(SecondPage)
       controller.updateList()
     else:
@@ -103,8 +101,8 @@ class SecondPage(tk.Frame):
       if thread.is_alive():
         # check the thread every 100ms
         self.after(100, lambda: self.monitor(thread))
-      else:
-        print("bot run")
+      # else:
+      #   print("bot run")
   def updateBotList(self):
     self.bots = getUserBot()
     for i in self.tree.get_children():
@@ -122,7 +120,6 @@ class SecondPage(tk.Frame):
       else:
         self.execButton['state'] = DISABLED
       # show a message
-      print(record)
 
 
 class PopUp(tk.Toplevel):

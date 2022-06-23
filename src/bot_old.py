@@ -35,7 +35,6 @@ class Window:
   def getDataList(self, method, element, skipFirst=False):
     dataList = []
     rawdata = []
-    print(element)
     rawdata = self.driver.find_elements(by=method, value=element)
 
     for d in range(len(rawdata)):
@@ -127,7 +126,8 @@ class Window:
       element_present = EC.presence_of_element_located((method, element))
       WebDriverWait(self.driver, timeout).until(element_present)
     except TimeoutException:
-      print("Timed out waiting for element")
+      pass
+      # print("Timed out waiting for element")
 
   def handleAlert(self, action, text=None):
     obj = self.driver.switch_to.alert
@@ -156,7 +156,6 @@ class Browser:
   def getDataList(self, method, element, skipFirst=False):
     dataList = []
     rawdata = []
-    print(element)
     rawdata = self.driver.find_elements(by=method, value=element)
 
     for d in range(len(rawdata)):
@@ -248,7 +247,8 @@ class Browser:
       element_present = EC.presence_of_element_located((method, element))
       WebDriverWait(self.driver, timeout).until(element_present)
     except TimeoutException:
-      print("Timed out waiting for element")
+      pass
+      # print("Timed out waiting for element")
 
   def handleAlert(self, action, text=None):
     obj = self.driver.switch_to.alert
