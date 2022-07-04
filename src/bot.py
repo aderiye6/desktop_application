@@ -18,6 +18,8 @@ def props(x):
     return dict((key, getattr(x, key)) for key in dir(x) if key not in dir(x.__class__))
 
 
+key = dict(props(Keys))
+
 def execScript(script):
   exec(script)
 
@@ -118,6 +120,72 @@ class Browser:
         dataDict[i['name']] = data
 
     return dataDict
+  def goBackHistory(driver, tabID, times):
+    tabs = driver.window_handles
+    driver.switch_to.window(tabs[tabID])
+    driver.execute_script(f"window.history.go({-1 * times})")
+    sleep(3)
+
+  def goForwardHistory(driver, tabID, times):
+    tabs = driver.window_handles
+    driver.switch_to.window(tabs[tabID])
+    driver.execute_script(f"window.history.go({times})")
+    sleep(3)
+
+  def elementClick(driver, tabID, method, element, options={"clicktype": "Single Click"}):
+    tabs = driver.window_handles
+    driver.switch_to.window(tabs[tabID])
+    driver.find_element(by=method, value=element).click()
+
+  def elementInput(driver, tabID, method, element, keysList):
+    tabs = driver.window_handles
+    driver.switch_to.window(tabs[tabID])
+    driver.find_element(by=method, value=element).send_keys(*keysList)
+
+
+  def refreshPage(driver, tabID):
+    tabs = driver.window_handles
+    driver.switch_to.window(tabs[tabID])
+    driver.refresh()
+
+  def saveImage(driver, tabID, method, element, filePath):
+    tabs = driver.window_handles
+    driver.switch_to.window(tabs[tabID])
+    img = driver.find_element(by=method, value=element)
+    src = img.get_attribute('src')
+    url.urlretrieve(src,filePath)
+    return filePath
+
+  def screenShot(driver, tabID, filePath):
+    tabs = driver.window_handles
+    driver.switch_to.window(tabs[tabID])
+    el = driver.find_element_by_tag_name('body')
+    el.screenshot(filePath)
+    return filePath
+
+  def waitElement(driver, tabID, method, element, options = {"condition": "To appear", "timeout": 30}):
+    tabs = driver.window_handles
+    driver.switch_to.window(tabs[tabID])
+    try:
+      if options["condition"] == "To appear":
+        element_present = EC.presence_of_element_located((method, element))
+        WebDriverWait(driver, options["timeout"]).until(element_present)
+    except TimeoutException:
+      pass
+      # print("Timed out waiting for element")
+
+  def handleAlert(self, action, text=None):
+    obj = self.driver.switch_to.alert
+    msg = obj.text
+    if action == 'accept':
+      obj.accept()
+    elif action == 'cancel':
+      obj.dismiss()
+    elif action == 'input':
+      obj.send_keys(text)
+
+    return msg
+
 
 
 class CSV:
