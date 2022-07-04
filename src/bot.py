@@ -207,12 +207,72 @@ class CSV:
     df.to_csv(filepath,
               sep=options['seperator'], index=options['index'], encoding=options['encoding'])
 
-  def dataFromCSV(path, filename, options=None):
+  def dataFromCSV(filePath, options=None):
     if not options:
       options = {
           'seperator': ',',
           'index': False,
           'encoding': 'utf-8'
       }
-    df = pd.read_csv(os.path.join(path, filename), sep=options['seperator'])
+    df = pd.read_csv(filePath, sep=options['seperator'])
     return df.to_dict(orient='list')
+
+  def mergeCSV(allFilePath, outputFilePath, options=None):
+    if not options:
+      options = {
+          'seperator': ',',
+          'index': False,
+          'encoding': 'utf-8'
+      }
+    #combine all files in the list
+    combined_csv = pd.concat(
+        [pd.read_csv(f, sep=options['seperator'], engine='python') for f in allFilePath])
+    #export to csv
+    combined_csv.to_csv(
+        outputFilePath, index=options['index'], encoding=options['encoding'])
+
+  def splitCSV(filePath, outputDir, outputName, maxRows, options=None):
+    if not options:
+      options = {
+          'seperator': ',',
+          'index': False,
+          'encoding': 'utf-8'
+      }
+    # To do: remove duplicate values
+    data = pd.read_csv(filePath, sep=options['seperator'], engine='python')
+    size = len(data)
+    length = maxRows
+    count = 0
+
+    start = count*length
+    end = length*(count + 1)
+    while start < size:
+
+      if end > size:
+        end = size
+      df = data[start: end]
+      df.to_csv(os.path.join(outputDir, f'{outputName}_{count+1}.csv'))
+      count += 1
+      start = count*length
+      end = length*(count + 1)
+
+    return outputDir
+    # if splitOptions['by'] == 'row':
+    #   size = len(data)
+    #   length = splitOptions['length']
+    #   count = 0
+
+    #   start = count*length
+    #   end = length*(count + 1)
+    #   while start < size:
+
+    #     if end > size:
+    #       end = size
+    #     df = data[start: end]
+    #     df.to_csv(os.path.join(outputDir, f'{outputName}_{count+1}.csv'))
+    #     count += 1
+    #     start = count*length
+    #     end = length*(count + 1)
+    # elif splitOptions['by'] == 'column':
+    #   # To do: split CSV by column, split csv by value on a column
+    #   pass
